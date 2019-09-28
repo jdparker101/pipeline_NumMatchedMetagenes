@@ -285,7 +285,7 @@ def NumMatchgtfs(infile, outfile):
 @follows(mkdir("geneprofiles.dir"))
 @product(removeduplicates,
          formatter(".+/(?P<TRACK>.+).bam"),
-         filter_geneset,
+         NumMatchgtfs,
          formatter("NumMatchedgtf.dir/(?P<BIOTYPE>.+).gtf.gz"),
          "geneprofiles.dir/{TRACK[0][0]}.{BIOTYPE[1][0]}.geneprofiles.tsv",
          "{TRACK[0][0]}",
@@ -319,8 +319,8 @@ def splitgeneprofiles(infiles, outfile, TRACK, BIOTYPE):
 @follows(mkdir("tssprofiles.dir"))
 @product(removeduplicates,
          formatter(".+/(?P<TRACK>.+).bam"),
-         filter_geneset,
-         formatter("NumMatchedgtf.dir.dir/(?P<BIOTYPE>.+).gtf.gz"),
+         NumMatchgtfs,
+         formatter("NumMatchedgtf.dir/(?P<BIOTYPE>.+).gtf.gz"),
          "tssprofiles.dir/{TRACK[0][0]}.{BIOTYPE[1][0]}.tssprofiles.tsv",
          "{TRACK[0][0]}",
          "{BIOTYPE[1][0]}")
@@ -364,7 +364,7 @@ def splittssprofiles(infiles, outfile, TRACK, BIOTYPE):
 def mergegeneprofiles(infiles, outfile):
     infiles = " ".join(infiles)
     statement = '''python ~/devel/cgat/CGAT/scripts/combine_tables.py 
-                   --regex-filename="geneprofiles.dir/(.+)_(.+)_(.+).bwa.filtered.deduplicated.(.+).filtered.matrix.tsv.gz" 
+                   --regex-filename="geneprofiles.dir/(.+)_(.+)_(.+).bwa.filtered.deduplicated.(.+).NumMatched.matrix.tsv.gz" 
                    --cat pulldown,condition,replicate,category 
                    -S %(outfile)s
                    %(infiles)s'''
@@ -376,9 +376,10 @@ def mergegeneprofiles(infiles, outfile):
 def mergetssprofiles(infiles, outfile):
     infiles = " ".join(infiles)
     statement = '''python ~/devel/cgat/CGAT/scripts/combine_tables.py 
-                   --regex-filename="tssprofiles.dir/(.+)_(.+)_(.+).bwa.filtered.deduplicated.(.+).filtered.matrix.tsv.gz" 
+                   --regex-filename="tssprofiles.dir/(.+)_(.+)_(.+).bwa.filtered.deduplicated.(.+).NumMatched.matrix.tsv.gz" 
                    --cat pulldown,condition,replicate,category 
-                   -S %(outfile)s'''
+                   -S %(outfile)s
+                   %(infiles)s'''
 
     job_memory="10G"
     P.run()
